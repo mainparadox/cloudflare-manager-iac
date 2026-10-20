@@ -1,0 +1,30 @@
+# ==============================================================================
+# TERRAFORM ENGINE & PROVIDER REGISTRY DECLARATIONS
+# ==============================================================================
+
+terraform {
+  required_providers {
+    # ARCHITECTURE: Pinned to major version 5.x. Modern Rulesets API engine
+    # (cloudflare_ruleset) requires v5.x provider contracts.
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 5.0"
+    }
+    # ARCHITECTURE: Pure in-memory cryptographic key & CSR generation;
+    # avoids host-level dependencies on external OpenSSL binaries.
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
+    # Persists generated Origin CA certificates and keys to tenant filesystem
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.5"
+    }
+  }
+}
+
+# ARCHITECTURE (Zero-Secret Configuration):
+# Credentials are intentionally omitted from HCL source. Authentication is resolved
+# out-of-band via the `CLOUDFLARE_API_TOKEN` process environment variable.
+provider "cloudflare" {}

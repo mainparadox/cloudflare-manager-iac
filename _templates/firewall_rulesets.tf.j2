@@ -1,0 +1,190 @@
+# ==============================================================================
+# CUSTOM FIREWALL RULESET (WAF FREE-TIER COMPATIBLE: 5 RULES + RATE LIMITING)
+# ==============================================================================
+resource "cloudflare_ruleset" "custom_waf_rules" {
+  zone_id     = var.zone_id
+  name        = "default"
+  description = "Custom WAF rules"
+  kind        = "zone"
+  phase       = "http_request_firewall_custom"
+
+  rules = [
+    # 1. Adaptive Geo-IP Filter (Configured dynamically via Zone Settings)
+    {
+      action      = "managed_challenge"
+      {% if custom_waf and custom_waf.rule_1 %}
+      expression  = {{ custom_waf.rule_1 | tojson }}
+      description = "Geo Filter (Custom)"
+      {% elif settings.geo_filter == 'by_only' %}
+      expression  = "(ip.src.country ne \"BY\") and (not cf.client.bot)"
+      description = "Block Non-BY but Allow SEO"
+      {% elif settings.geo_filter == 'by_ru' %}
+      expression  = "(not ip.src.country in {\"BY\" \"RU\"}) and (not cf.client.bot)"
+      description = "Block Non-BY/RU but Allow SEO"
+      {% else %}
+      expression  = "(not ip.src.country in {\"BY\" \"RU\"}) and (ip.src.continent ne \"EU\") and (not cf.client.bot)"
+      description = "Block Non-BY/RU/EU but Allow SEO"
+      {% endif %}
+      enabled     = true
+    },
+    
+    # 2. GLOBAL: Malicious Bots, Payload Injection & Backup Exposure Protection (Free-tier compliant: boolean decomposition without regex)
+    {
+      action      = "block"
+      {% if custom_waf and custom_waf.rule_2 %}
+      expression  = {{ custom_waf.rule_2 | tojson }}
+      {% else %}
+      expression  = "(http.user_agent eq \"\") or (http.user_agent contains \"python\") or (http.user_agent contains \"wget/\") or (lower(http.request.uri.path) contains \"/etc/passwd\") or (lower(http.request.uri.query) contains \"union select\") or (lower(http.request.uri.query) contains \"<script>\") or (http.request.uri.path contains \"../\") or (http.request.uri.path contains \"/.env\") or (http.request.uri.path contains \"/.git\") or ( (lower(http.request.uri.path) contains \".sql\" or lower(http.request.uri.path) contains \".bak\" or lower(http.request.uri.path) contains \".log\" or lower(http.request.uri.path) contains \".tar\" or lower(http.request.uri.path) contains \".gz\" or lower(http.request.uri.path) contains \".zip\") and not (http.request.uri.path contains \"/administrator/\") and not (http.request.uri.path contains \"/wp-admin/\") and not (http.request.uri.query contains \"controller=Admin\") )"
+      {% endif %}
+      description = "Global: Block Bots, Hack Payloads & Backups"
+      enabled     = true
+    },
+
+    # 3. THREAT INTELLIGENCE: Challenge reputation-scored IPs (Threat Score > 14)
+    {
+      action      = "managed_challenge"
+      {% if custom_waf and custom_waf.rule_3 %}
+      expression  = {{ custom_waf.rule_3 | tojson }}
+      {% else %}
+      expression  = "(cf.threat_score gt 14)"
+      {% endif %}
+      description = "Challenge High Threat Score IPs"
+      enabled     = true
+    }
+
+    {% if cms == 'joomla' %}
+    # --- RULES 4 & 5: JOOMLA CORE & ADMIN GATEWAY PROTECTION ---
+    ,{
+      action      = "block"
+      {% if custom_waf and custom_waf.rule_4 %}
+      expression  = {{ custom_waf.rule_4 | tojson }}
+      {% else %}
+      expression  = "(http.request.uri.path contains \"/configuration.php\") or (http.request.uri.path contains \"htaccess.txt\") or ( (lower(http.request.uri.path) contains \"/images/\") and (lower(http.request.uri.path) contains \".php\") )"
+      {% endif %}
+      description = "Joomla: Block Config & PHP in Images"
+      enabled     = true
+    },
+    {
+      action      = "managed_challenge"
+      {% if custom_waf and custom_waf.rule_5 %}
+      expression  = {{ custom_waf.rule_5 | tojson }}
+      {% else %}
+      expression  = "(http.request.uri.path contains \"/administrator/\") and (http.request.method eq \"GET\")"
+      {% endif %}
+      description = "Joomla: Challenge Admin (GET only)"
+      enabled     = true
+    }
+    {% endif %}
+
+    {% if cms == 'wordpress' %}
+    # --- RULES 4 & 5: WORDPRESS CORE & ADMIN GATEWAY PROTECTION ---
+    ,{
+      action      = "block"
+      {% if custom_waf and custom_waf.rule_4 %}
+      expression  = {{ custom_waf.rule_4 | tojson }}
+      {% else %}
+      expression  = "(http.request.uri.path contains \"/wp-config.php\") or (http.request.uri.path contains \"xmlrpc.php\") or ( (lower(http.request.uri.path) contains \"/wp-content/uploads/\") and (lower(http.request.uri.path) contains \".php\") )"
+      {% endif %}
+      description = "WP: Block Config, XMLRPC & PHP in Uploads"
+      enabled     = true
+    },
+    {
+      action      = "managed_challenge"
+      {% if custom_waf and custom_waf.rule_5 %}
+      expression  = {{ custom_waf.rule_5 | tojson }}
+      {% else %}
+      expression  = "((http.request.uri.path contains \"/wp-login.php\") or (http.request.uri.path contains \"/wp-admin/\")) and (http.request.method eq \"GET\")"
+      {% endif %}
+      description = "WP: Challenge Admin (GET only)"
+      enabled     = true
+    }
+    {% endif %}
+
+    {% if cms == 'prestashop_1_7' or cms == 'prestashop' %}
+    # --- RULES 4 & 5: PRESTASHOP 1.7 / 8.0+ CORE & ADMIN PROTECTION ---
+    ,{
+      action      = "block"
+      {% if custom_waf and custom_waf.rule_4 %}
+      expression  = {{ custom_waf.rule_4 | tojson }}
+      {% else %}
+      expression  = "(http.request.uri.path contains \"/app/config/parameters.php\") or (http.request.uri.path contains \"/vendor/\") or (http.request.uri.path contains \"/var/logs/\")"
+      {% endif %}
+      description = "PrestaShop 1.7+: Block Config, Vendor & Logs"
+      enabled     = true
+    },
+    {
+      action      = "managed_challenge"
+      {% if custom_waf and custom_waf.rule_5 %}
+      expression  = {{ custom_waf.rule_5 | tojson }}
+      {% else %}
+      expression  = "(http.request.uri.query contains \"controller=AdminLogin\") and (http.request.method eq \"GET\")"
+      {% endif %}
+      description = "PrestaShop 1.7+: Challenge Admin (GET only)"
+      enabled     = true
+    }
+    {% endif %}
+
+    {% if cms == 'prestashop_1_6' %}
+    # --- RULES 4 & 5: PRESTASHOP 1.6 CORE & ADMIN PROTECTION ---
+    ,{
+      action      = "block"
+      {% if custom_waf and custom_waf.rule_4 %}
+      expression  = {{ custom_waf.rule_4 | tojson }}
+      {% else %}
+      expression  = "(http.request.uri.path contains \"/config/settings.inc.php\") or (http.request.uri.path contains \"/vendor/\") or (http.request.uri.path contains \"/log/\")"
+      {% endif %}
+      description = "PrestaShop 1.6: Block Config, Vendor & Logs"
+      enabled     = true
+    },
+    {
+      action      = "managed_challenge"
+      {% if custom_waf and custom_waf.rule_5 %}
+      expression  = {{ custom_waf.rule_5 | tojson }}
+      {% else %}
+      expression  = "(http.request.uri.query contains \"controller=AdminLogin\") and (http.request.method eq \"GET\")"
+      {% endif %}
+      description = "PrestaShop 1.6: Challenge Admin (GET only)"
+      enabled     = true
+    }
+    {% endif %}
+  ]
+}
+
+# ==============================================================================
+# RATE LIMITING RULESET (ANTI-BRUTEFORCE & CREDENTIAL STUFFING DEFENSE)
+# ==============================================================================
+resource "cloudflare_ruleset" "rate_limit_rules" {
+  zone_id     = var.zone_id
+  name        = "default"
+  description = "Rate limiting"
+  kind        = "zone"
+  phase       = "http_ratelimit"
+
+  rules = [
+    {
+      action      = "block"
+      {% if custom_waf and custom_waf.rule_rate_limit %}
+      expression  = {{ custom_waf.rule_rate_limit | tojson }}
+      {% elif cms == 'joomla' %}
+      expression  = "(http.request.uri.path contains \"/administrator/\") and (http.request.method eq \"POST\")"
+      {% elif cms == 'wordpress' %}
+      expression  = "(http.request.uri.path contains \"/wp-login.php\")"
+      {% elif cms == 'prestashop_1_7' or cms == 'prestashop_1_6' or cms == 'prestashop' %}
+      expression  = "(http.request.uri.path contains \"/login\")"
+      {% else %}
+      expression  = "(http.request.uri.path contains \"/login\")"
+      {% endif %}
+      description = "Admin Rate Limit"
+      enabled     = true
+      
+      ratelimit = {
+        characteristics     = ["ip.src", "cf.colo.id"]
+        period              = 10
+        # Sliding window threshold: max 100 requests per 10-second period
+        requests_per_period = 100
+        mitigation_timeout  = 10
+        requests_to_origin  = false
+      }
+    }
+  ]
+}

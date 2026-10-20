@@ -1,0 +1,225 @@
+app:
+  title: "Cloudflare IaC Portal"
+
+nav:
+  language: "Language / Язык"
+  navigation: "Navigation"
+
+menu:
+  dashboard: "🔀 Projects (Dashboard)"
+  add_domain: "➕ Add Domain"
+  zone_settings: "⚙️ Zone Settings"
+  waf: "🛡️ WAF & Security"
+  tools: "🛠️ Admin Tools"
+
+dashboard:
+  title: "🔀 Project Topology"
+  custom_ssl: "🛡️ Custom SSL"
+  origin_ssl: "🔒 Origin CA (15 yrs)"
+  no_ssl: "⚪ No SSL Issued"
+  redirect_to: "Redirect to"
+  ip_label: "IP:"
+  zone_label: "Zone ID:"
+  folder_label: "Folder:"
+
+zone_settings:
+  title: "⚙️ Zone Configuration"
+  select_target: "Select target to configure:"
+  no_sites: "No available sites found in this category."
+  only_redirects: "🔀 Redirects Only"
+  all_main: "🌐 All MAIN Sites (Global Defaults)"
+  all_redirects: "🌐 All REDIRECTS"
+  global_info: "You are editing **GLOBAL** defaults. They will apply to all MAIN sites without custom overrides."
+  custom_info: "You are editing custom overrides for **{domain}**."
+  reset_btn: "🔄 Reset to Global Defaults"
+  save_btn: "💾 Save Configuration to DB"
+  saved_success: "Configuration successfully saved to config.yaml!"
+  force_geo_checkbox: "🔒 Preserve individual site Geo-filters during global sync"
+  force_all_reset_checkbox: "⚠️ FORCE RESET: Wipe ALL individual overrides across all sites"
+  force_reset_warn: "Warning! Saving will permanently remove all personal overrides from every site. Fleet will be reset to default template!"
+  geo_filter_label: "Access Regions (Geo-IP Filter)"
+  geo_options:
+    by_ru_eu: "Belarus, Russia and Europe"
+    by_ru: "Belarus and Russia"
+    by_only: "Belarus Only"
+  background_settings_title: "ℹ️ View background (automated) zone settings"
+  background_settings_desc: |
+    These settings are applied automatically:
+    1. **🔒 SSL Encryption Mode = `Full (Strict)`**
+    2. **🚀 TLS 1.3 = `ON`**
+    3. **🔄 Automatic HTTPS Rewrites = `ON`**
+    4. **⏱️ Challenge TTL = `1 Year` (31536000 seconds)**
+  view_keys_expander: "📄 View and copy generated SSL keys for hosting (ISPmanager / Nginx)"
+  view_keys_success: "✅ 15-year Origin CA certificate is active and ready for host installation!"
+  cert_label: "Origin Certificate (Paste into SSL Certificate field):"
+  key_label: "Private Key (Paste into Private Key field):"
+  redirect_global_info: "ℹ️ **BULK REDIRECT SYNCHRONIZATION** \n\nYou selected all mirror domains. Click the button below to provision/update redirect rulesets for all mirrors simultaneously."
+  redirect_single_info: "ℹ️ **{domain}** is a mirror domain (Redirect). \n\nIt routes all incoming traffic to `https://{target}{path}`."
+  apply_title: "🚀 Infrastructure Deployment"
+  apply_btn: "🚀 Generate Templates & Run Terraform"
+  processing_site: "### ⚙️ Processing Site: `{domain}`"
+  generated_success: "HCL configuration rendered in `sites/{folder}`"
+  deploy_success: "✅ Infrastructure for {domain} successfully updated!"
+  deploy_cert_info: "🔒 15-year certificate saved: `sites/{folder}/ssl/cert.pem`"
+  deploy_error: "❌ Deployment error for {domain}."
+  process_completed: "🏁 Operation completed."
+  always_https_label: "Always Use HTTPS"
+  browser_check_label: "Browser Integrity Check"
+  email_obfus_label: "Email Obfuscation"
+  security_level_label: "Security Level"
+  min_tls_label: "Minimum TLS Version"
+  sync_geo_preserved: "⚠️ Site overrides reset, but custom Geo-filters preserved!"
+  sync_all_wiped: "⚠️ ABSOLUTELY ALL site overrides wiped cleanly!"
+  sync_geo_reset: "⚠️ Individual Geo-filters reset to global baseline across fleet."
+  sync_defaults_updated: "🛡️ Global defaults updated. Individual site overrides preserved."
+  sync_geo_preserved: "⚠️ Site overrides (TLS, HTTPS, etc.) reset, but custom Geo-filters preserved!"
+  sync_all_wiped: "⚠️ ABSOLUTELY ALL site overrides (including Geo-filters) wiped cleanly!"
+  sync_geo_reset: "⚠️ Individual Geo-filters reset across all sites! Fleet unified under global filter."
+  sync_defaults_updated: "🛡️ Global defaults updated. Individual site overrides preserved."
+
+ssl_block:
+  title: "🔒 SSL Certificate Management (Cloudflare Origin CA)"
+  mass_issue: "🔑 Batch issue 15-year certificates for all sites without SSL"
+  force_reissue: "⚠️ FORCE REISSUE: Reissue keys EVEN for sites that already have them"
+  custom_ssl_toggle: "🛡️ Site has custom purchased SSL (Protect from changes)"
+  issued_success: "✅ 15-year Cloudflare Origin CA certificate is active for this domain."
+  reissue_single: "🔄 Force reissue Origin CA certificate for this site"
+  not_issued_info: "ℹ️ Certificate is not yet generated. It will be automatically issued on next Terraform apply."
+  mass_issue_info: "💡 Certificates will be requested for all eligible main sites during next apply."
+
+network:
+  title: "🌐 Network Routing (HashiCorp Registry Mirrors)"
+  vpn_ok: "✅ Network: Direct connection to HashiCorp active."
+  vpn_blocked: "⚠️ Network: Direct connection blocked. Regional mirror recommended."
+  use_mirror: "Use regional mirror for provider binaries"
+  recheck_btn: "🔄 Recheck Connectivity"
+  select_mirror: "Select active mirror endpoint:"
+  direct_download: "🛡️ Provider binaries will be fetched directly from upstream registry."
+
+add_domain:
+  title: "➕ Add New Project / Domain"
+  domain_label: "Enter domain name (e.g. example.com or вера-наука.бел)"
+  site_type_label: "Domain Topology Type:"
+  type_main: "Main Site"
+  type_redirect: "Mirror Domain (Redirect)"
+  cms_label: "Select CMS Architecture:"
+  target_site_label: "Redirect Destination (Target Host):"
+  target_path_label: "Destination URI Path (optional, e.g. /ponsse)"
+  no_main_sites_err: "No main sites exist yet. Register at least one main site first!"
+  server_ip_label: "Origin Server IP (for DNS A-records @ and www)"
+  ssl_choice_label: "SSL Certificate Strategy:"
+  ssl_choice_origin: "🔒 Auto-issue 15-year Cloudflare Origin CA certificate (Default)"
+  ssl_choice_custom: "🛡️ Domain has custom purchased SSL (Keep origin untouched)"
+  cf_integration_title: "Cloudflare Integration"
+  creation_method_label: "Zone Provisioning Method:"
+  method_auto: "Create automatically via Cloudflare API"
+  method_manual: "Already present in Cloudflare (Manual Zone ID)"
+  manual_zone_input: "Enter Cloudflare Zone ID:"
+  submit_btn: "💾 Register Domain in Database"
+  err_empty_fields: "Domain name and Server IP are required!"
+  err_domain_exists: "Domain {domain} already exists in database!"
+  err_manual_zone_empty: "Manual mode selected, but Zone ID was empty!"
+  err_no_token: "Cloudflare API token not configured in .env!"
+  err_no_acc_id: "Failed to resolve Account ID. Verify token permissions (Account -> Account Settings -> Read)."
+  err_cf_create: "Cloudflare zone creation rejected: {msg}"
+  success_domain_added: "Project {domain} successfully added to database!"
+  ns_notice: "⚠️ **MANDATORY: CONFIGURE THESE NAMESERVERS AT YOUR DOMAIN REGISTRAR:**"
+  next_step_notice: "👉 Next Step: Switch to 'Zone Settings' tab and execute Terraform to deploy DNS/WAF/SSL!"
+  manual_hardening_expander: "🛡️ Free Tier Optimization: Manual Post-Provisioning Hardening Checklist"
+  manual_hardening_content: |
+    > 💡 **Why this requires manual Web UI activation:**
+    > Cloudflare restricts programmatic API access to Bot Management and Page Shield on Free plans (`403 Feature not available via API`).
+    > However, Cloudflare **allows activating these enterprise-grade features for free directly in the Web Dashboard**!
+    
+    Complete these 4 quick steps in the Cloudflare dashboard once after domain registration:
+    
+    1. **Heuristic Bot Defense & AI Crawler Tarpits (`Security ➔ Settings`):**
+       * Scroll to the bottom and enable: **Bot Fight Mode = `ON`** (mitigates automated Layer 7 botnets).
+       * Enable: **AI Labyrinth = `ON`** (deploys honeypot links trapping automated scrapers in an infinite loop).
+    
+    2. **Client-Side Supply Chain Security (`Security ➔ Settings`):**
+       * Locate the Page Shield Lite block and enable: **Continuous script monitoring = `ON`** (monitors JS assets for unauthorized Magecart or e-skimming tampering).
+    
+    3. **AI Scraping Governance (`AI Crawl Control ➔ Security`):**
+       * **Search Engines (Google, Yandex, Bing):** keep **`Allow`** (preserves organic indexing).
+       * **AI Model Training:** switch to **`Block`** (prohibits content scraping from GPTBot, CCBot, etc.).
+       * **Block training in robots.txt:** toggle to **`ON`**.
+    
+    4. **Reverse Proxy Real-IP Restoration (Joomla CMS):**
+       * In the Joomla admin panel navigate to: *System ➔ Global Configuration ➔ Server* and set: **Behind Load Balancer = `Yes`** (restores actual visitor IPs from `CF-Connecting-IP`).
+
+waf:
+  title: "🛡️ Web Application Firewall (WAF) & Access Control"
+  no_main_sites: "No available main sites found."
+  select_site: "Select site to configure WAF rulesets:"
+  whitelist_title: "📍 Trusted IP Whitelist (IP Access Rules)"
+  whitelist_caption: "Trusted IPs bypass all security challenges. **Does NOT consume Free tier 5-rule quota!**"
+  whitelist_input: "Trusted IP addresses (comma separated):"
+  my_ip_btn: "📍 Detect My Current IP"
+  my_ip_info: "Detected IP: `{ip}`"
+  my_ip_err: "Failed to detect public IP"
+  whitelist_save_btn: "💾 Save IP Whitelist"
+  whitelist_saved_success: "✅ IP Whitelist for {domain} updated!"
+  waf_rules_caption: "Strict 5-rule custom firewall quota (Free tier maximum) + 1 Rate Limiting module."
+  waf_rules_title: "🛡️ 5-Rule WAF Security Suite `[{cms}]`"
+  rule_1_title: "🌍 Rule 1: Adaptive Geo-IP Firewall"
+  rule_1_action: "**Action:** `Managed Challenge` (Browser Verification)"
+  rule_1_desc: "Dynamically evaluated based on country selection in 'Zone Settings'."
+  rule_2_title: "🛡️ Rule 2: Global Exploit, Bot & Backup Shield"
+  rule_2_action: "**Action:** `Block`"
+  rule_3_title: "🤖 Rule 3: AI Threat Intelligence (Threat Score > 14)"
+  rule_3_action: "**Action:** `Managed Challenge`"
+  rule_4_title: "📁 Rule 4: CMS Core Protection `[{cms}]`"
+  rule_4_action: "**Action:** `Block`"
+  rule_5_title: "🔐 Rule 5: Administrative Gateway Lock"
+  rule_5_action: "**Action:** `Managed Challenge` (Captcha)"
+  rate_limit_title: "⏱️ Rate Limiting Module: Anti-Bruteforce Defense"
+  rate_limit_action: "**Action:** `Block` for 10 seconds on exceeding 100 POST requests"
+  expression_label: "Expression (Wirefilter syntax):"
+  save_waf_btn: "💾 Save WAF Rules to Database"
+  reset_waf_btn: "🔄 Reset Rules to Default"
+  waf_saved_success: "✅ WAF rules for {domain} saved to database!"
+  waf_reset_info: "Rules reset to factory defaults."
+  apply_waf_title: "🚀 Deploy Firewall for {domain}"
+  apply_waf_caption: "💡 **Convenience:** Button below automatically persists current expressions and applies them via Terraform."
+  apply_waf_btn: "🚀 Save & Deploy Firewall via Terraform"
+  apply_waf_success: "✅ Firewall rules for {domain} successfully synchronized!"
+  apply_waf_error: "❌ Failed to deploy firewall. Review logs above."
+
+tools:
+  title: "🛠️ Administrative Utilities"
+  purge_title: "🧹 Edge Cache Invalidation (Purge Cache)"
+  purge_caption: "Instantly evicts cached assets, scripts, and media across all global Cloudflare edge POPs."
+  select_purge_target: "Select target to invalidate:"
+  all_main_sites: "🌐 ALL MAIN SITES SIMULTANEOUSLY"
+  purge_btn: "🧹 Invalidate All Cache (Purge Everything)"
+  no_token: "Cloudflare API token not configured in .env!"
+  purge_success: "✅ Cache evicted for **{domain}** worldwide!"
+  purge_err: "❌ Cache invalidation failed for {domain}: {err}"
+  decommission_title: "🗑️ Tenant Decommissioning & Resource Teardown"
+  decommission_caption: "Complete and safe site teardown: cleans up Cloudflare resources, purges local state, and updates SSOT database."
+  select_delete_target: "Select domain to decommission:"
+  mirrors_warning: "⚠️ WARNING: Active mirrors are bound to this domain: {mirrors}. Reassign or remove them first!"
+  opt_destroy_tf: "Tear down managed resources via Terraform (DNS, WAF, SSL, redirects)"
+  opt_delete_zone_cf: "Delete authoritative zone from Cloudflare account (via API)"
+  opt_delete_files: "Delete local tenant workspace from disk (sites/{folder})"
+  confirm_label: "Type domain name to confirm ({domain}):"
+  delete_btn: "🚨 Permanently Destroy Site & Resources"
+  err_confirm_mismatch: "Confirmation input does not match target domain!"
+  destroy_failed: "❌ Terraform destroy failed for {domain}. Review logs above."
+  zone_delete_failed: "⚠️ Failed to delete zone from Cloudflare: {err}"
+  delete_success: "✅ Tenant {domain} successfully decommissioned and purged!"cascade_checkbox: "🔗 Cascade Teardown: also permanently destroy all bound mirrors ({mirrors})"
+  cascade_destroying: "### ⚙️ Tearing down bound mirror: `{domain}`"
+
+runner:
+  executing: "--- Executing: {cmd} ---"
+  binary_not_found: "❌ CRITICAL ERROR: Binary executable '{cmd}' not found!\nCheck path: {path}"
+
+healing:
+  ruleset_conflict: "⚠️ Pre-existing Cloudflare ruleset conflict detected. Reconciling remote state via import..."
+  importing: "[AUTO-RECOVERY] Importing {resource} -> {target}"
+  wildcard_rejected: "⚠️ Cloudflare rejected wildcard (*.) for {domain} (Code 1010). Retrying without wildcard..."
+  cert_revoked: "⚠️ Certificate was revoked/deleted in Cloudflare. Purging stale state cache..."
+  retry_apply: "🔄 Retrying deployment..."
+  
+  

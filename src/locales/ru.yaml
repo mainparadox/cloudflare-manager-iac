@@ -1,0 +1,221 @@
+app:
+  title: "Cloudflare IaC Portal"
+
+nav:
+  language: "Язык / Language"
+  navigation: "Навигация"
+
+menu:
+  dashboard: "🔀 Проекты (Дашборд)"
+  add_domain: "➕ Добавить домен"
+  zone_settings: "⚙️ Настройки Зоны"
+  waf: "🛡️ Фаервол"
+  tools: "🛠️ Инструменты"
+
+dashboard:
+  title: "🔀 Карта ваших проектов"
+  custom_ssl: "🛡️ Свой SSL"
+  origin_ssl: "🔒 Origin CA (15 лет)"
+  no_ssl: "⚪ SSL не выпущен"
+  redirect_to: "Редирект на"
+  ip_label: "IP:"
+  zone_label: "Zone ID:"
+  folder_label: "Папка:"
+
+zone_settings:
+  title: "⚙️ Управление настройками зоны"
+  select_target: "Выберите цель для редактирования:"
+  no_sites: "В этой категории пока нет доступных сайтов."
+  only_redirects: "🔀 Только редиректы"
+  all_main: "🌐 Все ОСНОВНЫЕ сайты (Глобальные настройки)"
+  all_redirects: "🌐 Все РЕДИРЕКТЫ"
+  global_info: "Вы редактируете **ГЛОБАЛЬНЫЕ** настройки. Они применятся ко всем ОСНОВНЫМ сайтам, у которых нет индивидуальных переопределений."
+  custom_info: "Вы редактируете индивидуальные настройки для **{domain}**."
+  reset_btn: "🔄 Сбросить до глобальных"
+  save_btn: "💾 Сохранить настройки в базу"
+  saved_success: "Настройки успешно сохранены в config.yaml!"
+  force_geo_checkbox: "🔒 Сохранить индивидуальные гео-фильтры сайтов (Сайты со своим гео-блоком не изменятся)"
+  force_all_reset_checkbox: "⚠️ ПРИНУДИТЕЛЬНЫЙ СБРОС: Стереть АБСОЛЮТНО ВСЕ индивидуальные настройки у всех сайтов"
+  force_reset_warn: "Внимание! При сохранении будут удалены все личные настройки у каждого сайта. Вся база будет приведена к единому шаблону!"
+  geo_filter_label: "Регионы доступа (Гео-блок)"
+  geo_options:
+    by_ru_eu: "Беларусь, Россия и Европа"
+    by_ru: "Беларусь и Россия"
+    by_only: "Только Беларусь"
+  background_settings_title: "ℹ️ Просмотреть фоновые (автоматические) настройки зоны"
+  background_settings_desc: |
+    Эти параметры применяются к сайтам автоматически:
+    1. **🔒 SSL Encryption Mode = `Full (Strict)`**
+    2. **🚀 TLS 1.3 = `ON`**
+    3. **🔄 Automatic HTTPS Rewrites = `ON`**
+    4. **⏱️ Challenge TTL = `1 год` (31536000 секунд)**
+  view_keys_expander: "📄 Просмотреть и скопировать готовые SSL-ключи для хостинга (ISPmanager)"
+  view_keys_success: "✅ Сертификат выпущен на 15 лет и готов к установке на ваш хостинг!"
+  cert_label: "Origin Certificate (Вставить в поле SSL-сертификат):"
+  key_label: "Private Key (Вставить в поле Приватный ключ):"
+  redirect_global_info: "ℹ️ **МАССОВОЕ ОБНОВЛЕНИЕ РЕДИРЕКТОВ** \n\nВы выбрали применение ко всем доменам-зеркалам. Нажмите кнопку ниже, чтобы запустить создание/обновление правил для всех зеркал разом."
+  redirect_single_info: "ℹ️ **{domain}** — это домен-зеркало (Редирект). \n\nОн перенаправляет весь трафик на `https://{target}{path}`."
+  apply_title: "🚀 Применение инфраструктуры"
+  apply_btn: "🚀 Сгенерировать файлы и запустить Terraform"
+  processing_site: "### ⚙️ Обработка сайта: `{domain}`"
+  generated_success: "Файлы сгенерированы в папке `sites/{folder}`"
+  deploy_success: "✅ Инфраструктура для {domain} успешно обновлена!"
+  deploy_cert_info: "🔒 15-летний сертификат успешно сохранен: `sites/{folder}/ssl/cert.pem`"
+  deploy_error: "❌ Ошибка применения настроек для {domain}."
+  process_completed: "🏁 Процесс завершен."
+  zone_settings:
+  always_https_label: "Принудительный HTTPS (Always Use HTTPS)"
+  browser_check_label: "Проверка браузера (Browser Integrity Check)"
+  email_obfus_label: "Защита email от спам-ботов (Email Obfuscation)"
+  security_level_label: "Уровень безопасности (Security Level)"
+  min_tls_label: "Минимальная версия TLS (Minimum TLS Version)"
+  sync_geo_preserved: "⚠️ Индивидуальные настройки (TLS, HTTPS и т.д.) сброшены, НО Гео-фильтры сохранены!"
+  sync_all_wiped: "⚠️ АБСОЛЮТНО ВСЕ индивидуальные настройки (включая Гео-фильтры) стерты!"
+  sync_geo_reset: "⚠️ Индивидуальные гео-фильтры всех сайтов сброшены! Теперь у всех единый глобальный фильтр."
+  sync_defaults_updated: "🛡️ Глобальные настройки обновлены. Индивидуальные настройки сайтов сохранены."
+
+ssl_block:
+  title: "🔒 Управление SSL-сертификатами (Cloudflare Origin CA)"
+  mass_issue: "🔑 Массовый выпуск 15-летних сертификатов для всех сайтов без SSL"
+  force_reissue: "⚠️ ПРИНУДИТЕЛЬНЫЙ ПЕРЕВЫПУСК: Перевыпустить ключи ДАЖЕ у тех, у кого они есть"
+  custom_ssl_toggle: "🛡️ У сайта свой купленный сертификат (Не трогать SSL сайта)"
+  issued_success: "✅ Для этого сайта уже выпущен 15-летний сертификат Cloudflare Origin CA."
+  reissue_single: "🔄 Принудительно перевыпустить сертификат Origin CA для этого сайта"
+  not_issued_info: "ℹ️ Сертификат еще не выпущен. Он сгенерируется автоматически при следующем нажатии запуска Terraform."
+  mass_issue_info: "💡 При запуске Terraform сертификаты будут сгенерированы для всех основных сайтов."
+
+network:
+  title: "🌐 Настройки сети (Обход блокировок HashiCorp)"
+  vpn_ok: "✅ Статус сети: Обнаружен прямой доступ к HashiCorp! (VPN активен)"
+  vpn_blocked: "⚠️ Статус сети: Доступ заблокирован. (VPN выключен)"
+  use_mirror: "Использовать обходные зеркала для скачивания плагинов"
+  recheck_btn: "🔄 Перепроверить сеть"
+  select_mirror: "Выберите рабочее зеркало:"
+  direct_download: "🛡️ Скачивание пойдет напрямую с оригинальных серверов."
+
+add_domain:
+  title: "➕ Добавить новый проект / домен"
+  domain_label: "Введите имя домена (например: example.com или вера-наука.бел)"
+  site_type_label: "Тип домена:"
+  type_main: "Основной сайт (Main)"
+  type_redirect: "Домен-зеркало (Redirect)"
+  cms_label: "Выберите CMS:"
+  target_site_label: "Куда редиректить? (Целевой сайт):"
+  target_path_label: "Путь на сайте (необязательно, например: /ponsse)"
+  no_main_sites_err: "У вас еще нет основных сайтов. Создайте хотя бы один!"
+  server_ip_label: "IP-адрес сервера (для DNS A-записей @ и www)"
+  ssl_choice_label: "Настройка SSL-сертификата:"
+  ssl_choice_origin: "🔒 Выпустить 15-летний сертификат Cloudflare Origin CA (По умолчанию)"
+  ssl_choice_custom: "🛡️ У сайта свой купленный сертификат (Не трогать SSL сайта)"
+  cf_integration_title: "Интеграция с Cloudflare"
+  creation_method_label: "Способ привязки:"
+  method_auto: "Создать автоматически (Через API)"
+  method_manual: "Уже добавлен в Cloudflare (У меня есть Zone ID)"
+  manual_zone_input: "Введите Zone ID:"
+  submit_btn: "💾 Добавить проект в базу"
+  err_empty_fields: "Имя домена и IP-адрес обязательны!"
+  err_domain_exists: "Домен {domain} уже существует в базе!"
+  err_manual_zone_empty: "Вы выбрали ручной ввод, но не указали Zone ID!"
+  err_no_token: "Токен Cloudflare не найден в .env!"
+  err_no_acc_id: "Не удалось получить Account ID. Проверьте права токена API (Account -> Account Settings -> Read)."
+  err_cf_create: "Ошибка создания зоны в Cloudflare: {msg}"
+  success_domain_added: "Проект {domain} успешно сохранен в базу!"
+  ns_notice: "⚠️ **ОБЯЗАТЕЛЬНО ПРОПИШИТЕ ЭТИ NS-СЕРВЕРЫ У ВАШЕГО РЕГИСТРАТОРА:**"
+  next_step_notice: "👉 Следующий шаг: Перейдите на вкладку 'Настройки Зоны' и нажмите кнопку запуска Terraform!"
+  manual_hardening_expander: "🛡️ Важно для Free-тарифа: Чек-лист ручного «дожима» безопасности"
+  manual_hardening_content: |
+    > 💡 **Почему это делается вручную через браузер:**
+    > Cloudflare блокирует программное включение защиты от ботов и мониторинга скриптов через API на бесплатном тарифе (`403 Feature not available via API`). 
+    > Однако эти **enterprise-функции можно бесплатно включить кликом мышки в веб-панели**!
+    
+    Сделайте эти 4 простых шага в панели Cloudflare один раз сразу после регистрации домена:
+    
+    1. **Защита от ботов и ловушка для ИИ (`Security ➔ Settings`):**
+       * Прокрутите страницу вниз и включите: **Bot Fight Mode = `ON`** (блокировка ботнетов).
+       * Включите: **AI Labyrinth = `ON`** (создание скрытых ссылок-ловушек, в которых бесконечно зацикливаются ИИ-парсеры).
+    
+    2. **Мониторинг внедрения вирусов в скрипты (`Security ➔ Settings`):**
+       * Найдите блок Page Shield Lite и включите: **Continuous script monitoring = `ON`** (постоянный аудит JS-библиотек сайта для защиты от вирусов Magecart и перехвата платежных форм).
+    
+    3. **Защита контента от нейросетей (`AI Crawl Control ➔ Security`):**
+       * **Search Engines (Поисковики):** оставьте **`Allow`** (чтобы Яндекс и Google продолжали индексировать сайт!).
+       * **AI Model Training (Обучение ИИ):** переключите в **`Block`** (запрещает GPTBot, CCBot и другим воровать тексты).
+       * **Block training in robots.txt:** включите тумблер (**`ON`**).
+    
+    4. **Настройка реальных IP в CMS (для Joomla):**
+       * В админке Joomla перейдите в: *Система ➔ Общие настройки ➔ Сервер* и включите: **За прокси-сервером = `Да`** (чтобы в логах и заказах отображались настоящие IP посетителей, а не сервера Cloudflare).
+
+waf:
+  title: "🛡️ Управление Фаерволом (WAF) и Белыми списками"
+  no_main_sites: "Нет доступных основных сайтов."
+  select_site: "Выберите сайт для просмотра и редактирования WAF:"
+  whitelist_title: "📍 Белый список IP (IP Access Rules)"
+  whitelist_caption: "Доверенные IP пропускаются мимо всех проверок и капч. **НЕ расходует лимит из 5 правил WAF!**"
+  whitelist_input: "Ваши доверенные IP (через запятую):"
+  my_ip_btn: "📍 Мой текущий IP"
+  my_ip_info: "Ваш IP: `{ip}`"
+  my_ip_err: "Не удалось определить IP"
+  whitelist_save_btn: "💾 Сохранить белый список IP"
+  whitelist_saved_success: "✅ Белый список для {domain} сохранен!"
+  waf_rules_caption: "Строго 5 правил фаервола (максимум для тарифа Free) + 1 отдельный модуль Rate Limit."
+  waf_rules_title: "🛡️ Комплекс 5 правил WAF `[{cms}]`"
+  rule_1_title: "🌍 Правило 1: Адаптивный Гео-фильтр (Geo-IP)"
+  rule_1_action: "**Действие:** `Managed Challenge` (Проверка браузера)"
+  rule_1_desc: "Формируется автоматически на основе выбора стран в разделе «Настройки Зоны»."
+  rule_2_title: "🛡️ Правило 2: Глобальный Анти-Хак и бэкапы"
+  rule_2_action: "**Действие:** `Block` (Блокировка)"
+  rule_3_title: "🤖 Правило 3: ИИ-анализ репутации IP (Threat Score > 14)"
+  rule_3_action: "**Действие:** `Managed Challenge` (Проверка браузера)"
+  rule_4_title: "📁 Правило 4: Защита ядра CMS `[{cms}]`"
+  rule_4_action: "**Действие:** `Block` (Блокировка)"
+  rule_5_title: "🔐 Правило 5: Защита входа в панель администратора"
+  rule_5_action: "**Действие:** `Managed Challenge` (Капча)"
+  rate_limit_title: "⏱️ Модуль Rate Limiting: Защита от перебора паролей"
+  rate_limit_action: "**Действие:** `Block` на 10 секунд при превышении 100 запросов"
+  expression_label: "Выражение правила (Expression):"
+  save_waf_btn: "💾 Сохранить изменения правил WAF в базу"
+  reset_waf_btn: "🔄 Сбросить правила до заводских"
+  waf_saved_success: "✅ Правила для {domain} сохранены в базу!"
+  waf_reset_info: "Правила сброшены до стандартных."
+  apply_waf_title: "🚀 Применить фаервол для {domain}"
+  apply_waf_caption: "💡 **Удобство:** Кнопка ниже автоматически сохранит все изменения выражений выше в базу и сразу применит их в Cloudflare."
+  apply_waf_btn: "🚀 Сохранить и применить фаервол в Terraform"
+  apply_waf_success: "✅ Фаервол и правила для {domain} успешно обновлены в Cloudflare!"
+  apply_waf_error: "❌ Ошибка применения фаервола. Смотрите логи выше."
+
+tools:
+  title: "🛠️ Инструменты администратора"
+  purge_title: "🧹 Очистка кэша Cloudflare (Purge Cache)"
+  purge_caption: "Мгновенно сбрасывает закэшированные стили, скрипты и картинки на всех серверах Cloudflare."
+  select_purge_target: "Выберите сайт для сброса кэша:"
+  all_main_sites: "🌐 ВСЕ ОСНОВНЫЕ САЙТЫ СРАЗУ"
+  purge_btn: "🧹 Очистить весь кэш (Purge Everything)"
+  no_token: "Токен Cloudflare не найден в .env!"
+  purge_success: "✅ Кэш для **{domain}** успешно сброшен!"
+  purge_err: "❌ Не удалось сбросить кэш для {domain}: {err}"
+  decommission_title: "🗑️ Вывод из эксплуатации и удаление домена"
+  decommission_caption: "Полное и безопасное удаление сайта: очистка ресурсов в Cloudflare, удаление файлов стейта и очистка базы."
+  select_delete_target: "Выберите домен для удаления:"
+  mirrors_warning: "⚠️ ВНИМАНИЕ: К этому сайту привязаны домены-зеркала: {mirrors}. Сначала переназначьте или удалите их!"
+  opt_destroy_tf: "Удалить все ресурсы через Terraform (DNS, WAF, SSL, редиректы)"
+  opt_delete_zone_cf: "Удалить саму зону из аккаунта Cloudflare (через API)"
+  opt_delete_files: "Удалить локальную папку сайта с диска (sites/{folder})"
+  confirm_label: "Для подтверждения введите имя домена ({domain}):"
+  delete_btn: "🚨 Безвозвратно удалить сайт и ресурсы"
+  err_confirm_mismatch: "Введенное имя не совпадает с выбранным доменом!"
+  destroy_failed: "❌ Ошибка terraform destroy для {domain}. Проверьте логи."
+  zone_delete_failed: "⚠️ Не удалось удалить зону из Cloudflare: {err}"
+  delete_success: "✅ Проект {domain} полностью выведен из эксплуатации и удален!"
+  cascade_checkbox: "🔗 Каскадное удаление: также безвозвратно снести все привязанные зеркала ({mirrors})"
+  cascade_destroying: "### ⚙️ Снос зависимого зеркала: `{domain}`"
+
+runner:
+  executing: "--- Запуск: {cmd} ---"
+  binary_not_found: "❌ КРИТИЧЕСКАЯ ОШИБКА: Исполняемый файл '{cmd}' не найден!\nПроверьте путь: {path}"
+
+healing:
+  ruleset_conflict: "⚠️ Обнаружен скрытый пустой контейнер правил в Cloudflare. Запускаю авто-импорт стейта..."
+  importing: "[АВТО-ВОССТАНОВЛЕНИЕ] Импорт {resource} -> {target}"
+  wildcard_rejected: "⚠️ Cloudflare отклонил wildcard (*.) для {domain} (код 1010). Запускаю авто-выпуск без звездочки..."
+  cert_revoked: "⚠️ Сертификат был удален в Cloudflare вручную. Очищаю память стейта..."
+  retry_apply: "🔄 Повторяю попытку применения настроек..."

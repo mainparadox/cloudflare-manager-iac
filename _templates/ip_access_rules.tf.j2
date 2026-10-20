@@ -1,0 +1,15 @@
+# ==============================================================================
+# TRUSTED IP ACCESS RULES (ALLOWLIST - DOES NOT CONSUME 5-RULE WAF QUOTA)
+# ==============================================================================
+
+{% for ip in whitelist_ips %}
+resource "cloudflare_access_rule" "whitelist_ip_{{ loop.index }}" {
+  zone_id = var.zone_id
+  mode    = "whitelist"
+  notes   = "Trusted IP: {{ ip }}"
+  configuration = {
+    target = "ip"
+    value  = "{{ ip }}"
+  }
+}
+{% endfor %}

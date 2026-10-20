@@ -1,0 +1,31 @@
+# ==============================================================================
+# AUTHORITATIVE DNS A-RECORDS (@ APEX AND WWW CANONICAL SUBDOMAIN)
+#
+# ARCHITECTURE:
+#   Directs apex (@) and www traffic through Cloudflare's Anycast edge network.
+#   - `proxied = true`: Routes traffic through the Cloudflare WAF, DDoS mitigation,
+#     and edge caching layers rather than resolving directly to origin IP.
+#   - `ttl = 1`: Designates Cloudflare's "Automatic" TTL behavior for managed zones.
+# ==============================================================================
+
+# Apex root domain A-record
+resource "cloudflare_dns_record" "root_a" {
+  content  = "{{ ip }}"
+  name     = "@"
+  proxied  = true
+  tags     = []
+  ttl      = 1
+  type     = "A"
+  zone_id  = var.zone_id
+}
+
+# Canonical 'www' subdomain A-record
+resource "cloudflare_dns_record" "www_a" {
+  content  = "{{ ip }}"
+  name     = "www"
+  proxied  = true
+  tags     = []
+  ttl      = 1
+  type     = "A"
+  zone_id  = var.zone_id
+}

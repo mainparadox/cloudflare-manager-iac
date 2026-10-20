@@ -1,0 +1,11 @@
+# ==============================================================================
+# TENANT WORKSPACE INPUT VARIABLES
+# ==============================================================================
+
+variable "zone_id" {
+  description = "Cloudflare Zone ID scoping all managed resources in this workspace"
+  type        = string
+  # ARCHITECTURE: Default is pre-rendered via Jinja2, enabling standalone
+  # CLI execution (terraform plan/apply) without external -var or .tfvars flags.
+  default     = "{{ zone_id }}"
+}

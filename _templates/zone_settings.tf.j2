@@ -1,0 +1,66 @@
+# ==============================================================================
+# EDGE ZONE BASELINE SETTINGS (SECURITY, TLS & TRANSPORT HARDENING)
+# ==============================================================================
+
+# 1. Full (Strict) SSL Encryption Mode (Requires valid trusted cert on origin)
+resource "cloudflare_zone_setting" "ssl" {
+  zone_id    = var.zone_id
+  setting_id = "ssl"
+  value      = "strict"
+}
+
+# 2. Edge-Level HTTP-to-HTTPS Automatic Redirection
+resource "cloudflare_zone_setting" "always_use_https" {
+  zone_id    = var.zone_id
+  setting_id = "always_use_https"
+  value      = "{{ 'on' if settings.always_https else 'off' }}"
+}
+
+# 3. Minimum Transport Layer Security (TLS) Version Enforcement
+resource "cloudflare_zone_setting" "min_tls" {
+  zone_id    = var.zone_id
+  setting_id = "min_tls_version"
+  value      = "{{ settings.min_tls_version }}"
+}
+
+# 4. Zero Round-Trip Time (0-RTT) TLS 1.3 Protocol Acceleration
+resource "cloudflare_zone_setting" "tls_1_3" {
+  zone_id    = var.zone_id
+  setting_id = "tls_1_3"
+  value      = "on"
+}
+
+# 5. Edge-Level Mixed Content Mitigation (Automatic HTTPS Rewrites)
+resource "cloudflare_zone_setting" "automatic_https" {
+  zone_id    = var.zone_id
+  setting_id = "automatic_https_rewrites"
+  value      = "on"
+}
+
+# 6. Browser Integrity Check (BIC) - Evaluates Anomalous HTTP Request Headers
+resource "cloudflare_zone_setting" "browser_check" {
+  zone_id    = var.zone_id
+  setting_id = "browser_check"
+  value      = "{{ 'on' if settings.browser_check else 'off' }}"
+}
+
+# 7. Challenge Clearance Lifetime (Controls Duration Before Re-Challenging Clients)
+resource "cloudflare_zone_setting" "challenge_ttl" {
+  zone_id    = var.zone_id
+  setting_id = "challenge_ttl"
+  value      = {{ settings.challenge_ttl }}
+}
+
+# 8. Anti-Scraping Email Address Obfuscation
+resource "cloudflare_zone_setting" "email_obfuscation" {
+  zone_id    = var.zone_id
+  setting_id = "email_obfuscation"
+  value      = "{{ 'on' if settings.email_obfuscation else 'off' }}"
+}
+
+# 9. Edge Reputation & Threat Sensitivity Threshold
+resource "cloudflare_zone_setting" "security_level" {
+  zone_id    = var.zone_id
+  setting_id = "security_level"
+  value      = "{{ settings.security_level }}"
+}

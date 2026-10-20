@@ -1,0 +1,167 @@
+# ==============================================================================
+# GLOBAL DEFAULT CONFIGURATION / ГЛОБАЛЬНЫЕ НАСТРОЙКИ ПО УМОЛЧАНИЮ
+#
+# [EN] Baseline perimeter parameters applied to all main sites across the fleet.
+#      Individual sites can safely override any of these keys in 'custom_settings'.
+# [RU] Базовые параметры безопасности, применяемые ко всем основным сайтам.
+#      Любой сайт может точечно переопределить любой параметр в 'custom_settings'.
+# ==============================================================================
+global_defaults:
+  # [EN] Force HTTP-to-HTTPS 301 redirection at Cloudflare edge PoPs
+  # [RU] Принудительный 301-редирект с HTTP на HTTPS на серверах Cloudflare
+  always_https: true
+
+  # [EN] Browser Integrity Check: evaluates HTTP headers and mitigates malicious bots
+  # [RU] Проверка целостности браузера: анализ заголовков и отсечение вредоносных ботов
+  browser_check: true
+
+  # [EN] On-page dynamic JavaScript encryption for email addresses against scrapers
+  # [RU] Динамическое шифрование email на страницах для защиты от спам-парсеров
+  email_obfuscation: true
+
+  # [EN] Threat score sensitivity: essentially_off delegates filtering to custom WAF
+  # [RU] Порог угроз: essentially_off передает точечный контроль нашему кастомному WAF
+  security_level: essentially_off
+
+  # [EN] Enforce minimum TLS 1.2, eliminating insecure TLS 1.0 and 1.1 protocols
+  # [RU] Запрет устаревших и небезопасных протоколов TLS 1.0 и 1.1 (стандарт PCI DSS)
+  min_tls_version: '1.2'
+
+  # [EN] Regional Geo-IP policy: 'by_only' (Belarus), 'by_ru' (+Russia), 'by_ru_eu' (+Europe)
+  # [RU] Политика Гео-блока: 'by_only' (только РБ), 'by_ru' (РБ+РФ), 'by_ru_eu' (РБ+РФ+ЕС)
+  geo_filter: by_only
+
+  # [EN] Managed Challenge clearance lifetime: 1 year in seconds (prevents captcha loops)
+  # [RU] Срок действия пройденной капчи: 1 год в секундах (защита от повторных проверок)
+  challenge_ttl: 31536000
+
+
+# ==============================================================================
+# SITE TOPOLOGY DATABASE / БАЗА САЙТОВ И ТОПОЛОГИЯ ИНФРАСТРУКТУРЫ
+#
+# [EN] Declarative inventory representing the multi-tenant domain fleet.
+# [RU] Декларативная база данных всех управляемых доменов и зеркал.
+# ==============================================================================
+sites:
+
+  # ----------------------------------------------------------------------------
+  # 1. Standard Production Main Site / Стандартный основной сайт-витрина
+  # ----------------------------------------------------------------------------
+  example.com:
+    # [EN] Topology role: 'main' (production website) or 'redirect' (HTTP 301 mirror)
+    # [RU] Архитектурная роль: 'main' (основной сайт) или 'redirect' (домен-зеркало)
+    type: main
+
+    # [EN] Active state: true = synchronize via Terraform, false = skip execution
+    # [RU] Статус активности: true = управлять через Terraform, false = пропускать
+    active: true
+
+    # [EN] CMS vulnerability profile: joomla, wordpress, prestashop_1_6, prestashop_1_7, html/other
+    # [RU] Профиль движка для WAF: joomla, wordpress, prestashop_1_6, prestashop_1_7, html/other
+    cms: joomla
+
+    # [EN] Origin hosting IPv4 address for authoritative apex (@) and www DNS A-records
+    # [RU] IPv4 адрес сервера хостинга для DNS A-записей домена (@ и www)
+    ip: 198.51.100.10
+
+    # [EN] Cloudflare Zone ID (32-character hexadecimal identifier from dashboard)
+    # [RU] Идентификатор зоны в Cloudflare (32-значный hex-ключ из панели управления)
+    zone_id: 1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d
+
+    # [EN] ASCII/Punycode representation (RFC 3492) utilized by Cloudflare DNS and APIs
+    # [RU] Punycode-представление домена для DNS-записей и вызовов Cloudflare API
+    domain_puny: example.com
+
+    # [EN] Isolated workspace directory name inside the 'sites/' directory
+    # [RU] Имя изолированной рабочей папки сайта внутри директории 'sites/'
+    folder_name: example.com
+
+    # [EN] Granular overrides replacing global_defaults exclusively for this tenant
+    # [RU] Индивидуальные настройки, переопределяющие global_defaults для этого сайта
+    custom_settings: {}
+
+    # [EN] Trusted IP addresses bypassing all WAF challenges (does NOT consume rule quotas)
+    # [RU] Белый список IP: пропуск мимо всех капч и WAF (НЕ расходует лимит правил)
+    whitelist_ips:
+      - 198.51.100.50
+      - 203.0.113.25
+
+    # [EN] Cryptographic policy: true = automatically provision 15-year Cloudflare Origin CA
+    # [RU] Криптография: true = автоматически выпустить и привязать 15-летний Origin CA SSL
+    origin_ca: true
+
+
+  # ----------------------------------------------------------------------------
+  # 2. Cyrillic IDN Domain (.БЕЛ / .РФ) / Кириллический русскоязычный домен
+  # ----------------------------------------------------------------------------
+  пример-сайта.бел:
+    type: main
+    active: true
+    cms: joomla
+    ip: 198.51.100.20
+    zone_id: 2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e
+
+    # [EN] Mandatory Punycode representation preventing validation crashes on non-ASCII zones
+    # [RU] Обязательное Punycode-представление для предотвращения ошибок с кириллицей в API
+    domain_puny: xn----7sbbab2b1a2a4b.xn--90ais
+
+    # [EN] Phonetically slugified directory path ensuring POSIX compatibility across all OS
+    # [RU] Транслитерированное имя папки для совместимости с Windows, Linux и Docker
+    folder_name: primer-sayta.bel
+
+    custom_settings: {}
+    whitelist_ips: []
+    origin_ca: true
+
+
+  # ----------------------------------------------------------------------------
+  # 3. E-Commerce Store with Custom SSL / Интернет-магазин со своим покупным SSL
+  # ----------------------------------------------------------------------------
+  shop.example.com:
+    type: main
+    active: true
+    cms: prestashop_1_6
+    ip: 198.51.100.10
+    zone_id: 3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f
+    domain_puny: shop.example.com
+    folder_name: shop.example.com
+
+    # [EN] Custom override: this store requires access from Europe in addition to BY/RU
+    # [RU] Пример переопределения: магазину открыт доступ из Европы в отличие от базы
+    custom_settings:
+      geo_filter: by_ru_eu
+
+    whitelist_ips: []
+
+    # [EN] SAFETY LOCK: true = site uses purchased external SSL; protects host from changes
+    # [RU] СТРАХОВКА: true = у сайта свой покупной SSL; запрещает перезапись ключей на хостинге
+    has_custom_ssl: true
+
+    # [EN] Disable Origin CA generation since private key is already managed externally
+    # [RU] Отключение генерации Origin CA, так как сертификат уже установлен вручную
+    origin_ca: false
+
+
+  # ----------------------------------------------------------------------------
+  # 4. Domain Mirror with 301 Redirect / Домен-зеркало с Edge 301-перенаправлением
+  # ----------------------------------------------------------------------------
+  mirror.example.com:
+    type: redirect
+    active: true
+    ip: 198.51.100.10
+    zone_id: 4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a
+    domain_puny: mirror.example.com
+
+    # [EN] Target destination hostname routed via Cloudflare Anycast edge Single Redirect
+    # [RU] Целевой домен, на который Cloudflare мгновенно перенаправляет весь трафик
+    target_site: example.com
+
+    # [EN] Optional URI path appended to destination URL (e.g. '/promo' or empty '')
+    # [RU] Дополнительный URI-путь перенаправления (например, '/promo' или оставьте пустым '')
+    target_path: /promo
+
+    # [EN] Isolated directory prefix preventing naming collisions with primary workspaces
+    # [RU] Префикс папки зеркала для предотвращения конфликтов с основными сайтами
+    folder_name: redirect-mirror.example.com
+
+    custom_settings: {}

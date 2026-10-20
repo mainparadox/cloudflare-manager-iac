@@ -1,0 +1,46 @@
+# ==============================================================================
+# AUTOMATED 15-YEAR CLOUDFLARE ORIGIN CA CERTIFICATE PROVISIONING
+# ==============================================================================
+
+# 1. Generate RSA-2048 private key
+resource "tls_private_key" "origin_key" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+# 2. Generate Certificate Signing Request (CSR)
+resource "tls_cert_request" "origin_csr" {
+  private_key_pem = tls_private_key.origin_key.private_key_pem
+
+  subject {
+    common_name  = "{{ domain }}"
+    organization = "Cloudflare Origin CA"
+  }
+}
+
+# 3. Request 15-year signed Origin Certificate from Cloudflare (5475 days)
+resource "cloudflare_origin_ca_certificate" "origin_cert" {
+  csr                = tls_cert_request.origin_csr.cert_request_pem
+  # ARCHITECTURE: UTF-8 domain name is preserved; handles dynamic fallback on IDN wildcard validation
+  hostnames          = {% if no_wildcard %}["{{ domain }}"]{% else %}["{{ domain }}", "*.{{ domain }}"]{% endif %}
+  request_type       = "origin-rsa"
+  requested_validity = 5475
+
+  # ARCHITECTURE: Lifecycle ignore prevents unwanted certificate churn caused by 
+  # character casing or IDN normalization differences during remote state refreshes.
+  lifecycle {
+    ignore_changes = all
+  }
+}
+
+# 4. Persist signed certificate to tenant workspace (ssl/cert.pem)
+resource "local_file" "cert_file" {
+  content  = cloudflare_origin_ca_certificate.origin_cert.certificate
+  filename = "${path.module}/ssl/cert.pem"
+}
+
+# 5. Persist private key to tenant workspace (marked sensitive to prevent log leakage)
+resource "local_sensitive_file" "key_file" {
+  content  = tls_private_key.origin_key.private_key_pem
+  filename = "${path.module}/ssl/key.pem"
+}
