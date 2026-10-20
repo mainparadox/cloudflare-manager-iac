@@ -13,20 +13,19 @@
 ---
 
 ## 📌 Table of Contents
-1. [System Architecture](#-system-architecture)
-2. [Core Engineering Highlights](#-core-engineering-highlights)
-3. [Repository Topology](#-repository-topology)
-4. [Prerequisites & Installation](#-prerequisites--installation)
-5. [Cloudflare API Token Configuration](#-cloudflare-api-token-configuration)
-6. [Operational Manual & Workflows](#-operational-manual--workflows)
-7. [Self-Healing State Reconciliation Trio](#-self-healing-state-reconciliation-trio)
-8. [Origin CA vs Let's Encrypt Architecture](#-origin-ca-vs-lets-encrypt-architecture)
-9. [Enterprise Free-Tier WAF Hardening](#-enterprise-free-tier-waf-hardening)
-10. [Hosting Integration (ISPmanager / Nginx)](#-hosting-integration-ispmanager--nginx)
-11. [Post-Provisioning Manual Hardening Checklist](#-post-provisioning-manual-hardening-checklist)
-12. [Troubleshooting & FAQ](#-troubleshooting--faq)
-13. [License](#-license)
-
+1. [System Architecture](#system-architecture)
+2. [Core Engineering Highlights](#core-engineering-highlights)
+3. [Repository Topology](#repository-topology)
+4. [Prerequisites & Installation](#prerequisites--installation)
+5. [Cloudflare API Token Configuration](#cloudflare-api-token-configuration)
+6. [Operational Manual & Workflows](#operational-manual--workflows)
+7. [Self-Healing State Reconciliation Trio](#self-healing-state-reconciliation-trio)
+8. [Origin CA vs Let's Encrypt Architecture](#origin-ca-vs-lets-encrypt-architecture)
+9. [Enterprise Free-Tier WAF Hardening](#enterprise-free-tier-waf-hardening)
+10. [Hosting Integration (ISPmanager / Nginx)](#hosting-integration-ispmanager--nginx)
+11. [Post-Provisioning Manual Hardening Checklist](#post-provisioning-manual-hardening-checklist)
+12. [Troubleshooting & FAQ](#troubleshooting--faq)
+13. [License](#license)
 ---
 
 ## 🏛️ System Architecture
