@@ -23,8 +23,9 @@
 8. [Origin CA vs Let's Encrypt Architecture](#-origin-ca-vs-lets-encrypt-architecture)
 9. [Enterprise Free-Tier WAF Hardening](#-enterprise-free-tier-waf-hardening)
 10. [Hosting Integration (ISPmanager / Nginx)](#-hosting-integration-ispmanager--nginx)
-11. [Troubleshooting & FAQ](#-troubleshooting--faq)
-12. [License](#-license)
+11. [Post-Provisioning Manual Hardening Checklist](#-post-provisioning-manual-hardening-checklist)
+12. [Troubleshooting & FAQ](#-troubleshooting--faq)
+13. [License](#-license)
 
 ---
 
@@ -236,26 +237,13 @@ Access the application at `http://localhost:8501`. The control plane inspects th
 
 ## 🔄 Self-Healing State Reconciliation Trio
 
-The `TerraformRunner` (`src/services/terraform_runner.py`) encapsulates automated recovery routines for the three most common Cloudflare provider failures:
+The `TerraformRunner` (`src/services/terraform_runner.py`) encapsulates automated recovery circuits for the three most common Cloudflare provider failures:
 
-```text
-========================================================================================
-FAILURE MODE               SYMPTOM / ROOT CAUSE            AUTOMATED SELF-HEALING ACTION
-========================================================================================
-Error 20217                Cloudflare auto-creates an      Runner catches 20217, queries
-Ruleset Container          empty ruleset container for     GET /zones/{id}/rulesets, maps
-Collision                  phases upon zone activation.    phases to HCL resource names,
-                           Terraform throws 20217.         runs 'terraform import', and retries.
-----------------------------------------------------------------------------------------
-Error 1010                 Cloudflare Origin CA rejects    Runner catches 1010, calls back
-Cyrillic Wildcard SAN      wildcard hostname (*.domain)   TemplateEngine with 'no_wildcard=True',
-Validation Rejection       on select Cyrillic IDNs.        re-renders manifests, and redeploys.
-----------------------------------------------------------------------------------------
-Error 1014                 Certificate was deleted/revoked Runner catches 1014, invokes
-Out-of-band Revocation     manually in web dashboard.      'terraform state rm' on dead cert,
-Drift                      Terraform holds a zombie state. requests fresh keys, and redeploys.
-========================================================================================
-```
+| Failure Mode & Error Code | Root Cause / API Behavior | Autonomous Self-Healing Action |
+| :--- | :--- | :--- |
+| **Error 20217**<br>`Ruleset Collision` | Cloudflare auto-provisions hidden empty ruleset containers upon zone activation. Subsequent declarative creation throws 20217. | Runner catches 20217, queries `GET /zones/{id}/rulesets`, maps phases to HCL resource names, executes targeted `terraform import`, and retries. |
+| **Error 1010**<br>`Cyrillic Wildcard Rejection` | Cloudflare Origin CA fails to validate wildcard certs (`*.domain`) for specific IDN/Cyrillic zones (`.бел` / `.рф`). | Runner catches 1010, calls back `TemplateEngine` with `no_wildcard=True`, dynamically regenerates HCL manifests, and redeploys without interruption. |
+| **Error 1014**<br>`Out-of-band Revocation Drift` | Certificate was deleted or revoked manually via the Cloudflare web UI. Local Terraform state holds a dead zombie resource causing 1014 during refresh. | Runner catches 1014, invokes `terraform state rm` to evict the zombie state reference, requests fresh cryptographic keypairs, and converges state. |
 
 ---
 
@@ -319,19 +307,13 @@ Our Jinja2 template (`_templates/firewall_rulesets.tf.j2`) optimizes protection 
 > Cloudflare intentionally restricts programmatic API/Terraform access to Bot Management and Page Shield on Free-tier zones (returning `HTTP 403 / Feature not available via API`).
 > However, Cloudflare **grants full access to activate these enterprise-grade defenses manually via the Web UI**. Complete this one-time 2-minute checklist after executing Terraform:
 
-```text
-┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                   POST-DEPLOYMENT EDGE & CMS HARDENING CHECKLIST                       │
-├──────────────────────────┬─────────────────────────────┬───────────────────────────────┤
-│ CLOUDFLARE DASHBOARD     │ SECURITY FEATURE            │ RECOMMENDED VALUE & IMPACT    │
-├──────────────────────────┼─────────────────────────────┼───────────────────────────────┤
-│ Security ➔ Settings      │ Bot Fight Mode              │ [ON] Heuristic botnet drop    │
-│ Security ➔ Settings      │ AI Labyrinth                │ [ON] Honeypot scraper tarpit  │
-│ Security ➔ Settings      │ Continuous Script Monitor   │ [ON] Client-side Magecart guard│
-│ AI Crawl Control         │ AI Model Training Scrapers  │ [Block] Protects proprietary IP│
-│ CMS Core (Joomla/Nginx)  │ Behind Reverse Proxy        │ [Yes] Restores real client IPs│
-└──────────────────────────┴─────────────────────────────┴───────────────────────────────┘
-```
+| Cloudflare Dashboard View | Targeted Security Feature | Recommended Value & Operational Impact |
+| :--- | :--- | :--- |
+| **Security ➔ Settings** | `Bot Fight Mode` | **`[ON]`** Automated heuristic Layer 7 botnet drop |
+| **Security ➔ Settings** | `AI Labyrinth` | **`[ON]`** Honeypot crawl traps exhausting scraper botnets |
+| **Security ➔ Settings** | `Continuous Script Monitor` | **`[ON]`** Client-side Page Shield Lite Magecart tamper audit |
+| **AI Crawl Control** | `AI Model Training Scrapers` | **`[Block]`** Prohibits proprietary content scraping by LLMs |
+| **CMS Core (Joomla/Nginx)** | `Behind Reverse Proxy` | **`[Yes]`** Restores actual client IPs via `CF-Connecting-IP` |
 
 ---
 
@@ -373,6 +355,7 @@ Because all incoming traffic is proxied through Cloudflare Anycast edge nodes, w
 #### 3. For WordPress / PrestaShop:
 * Ensure your origin web server utilizes Nginx `set_real_ip_from` or Apache `mod_remoteip` targeting Cloudflare's published public IP ranges, ensuring internal security plugins log accurate visitor identities.
 
+---
 
 ## ❓ Troubleshooting & FAQ
 
