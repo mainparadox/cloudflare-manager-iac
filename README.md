@@ -13,22 +13,22 @@
 ---
 
 ## 📌 Table of Contents
-1. [System Architecture](#system-architecture)
-2. [Core Engineering Highlights](#core-engineering-highlights)
-3. [Repository Topology](#repository-topology)
-4. [Prerequisites & Installation](#prerequisites--installation)
-5. [Cloudflare API Token Configuration](#cloudflare-api-token-configuration)
-6. [Operational Manual & Workflows](#operational-manual--workflows)
-7. [Self-Healing State Reconciliation Trio](#self-healing-state-reconciliation-trio)
-8. [Origin CA vs Let's Encrypt Architecture](#origin-ca-vs-lets-encrypt-architecture)
-9. [Enterprise Free-Tier WAF Hardening](#enterprise-free-tier-waf-hardening)
-10. [Hosting Integration (ISPmanager / Nginx)](#hosting-integration-ispmanager--nginx)
-11. [Post-Provisioning Manual Hardening Checklist](#post-provisioning-manual-hardening-checklist)
-12. [Troubleshooting & FAQ](#troubleshooting--faq)
-13. [License](#license)
+1. [System Architecture](#1-system-architecture)
+2. [Core Engineering Highlights](#2-core-engineering-highlights)
+3. [Repository Topology](#3-repository-topology)
+4. [Prerequisites & Installation](#4-prerequisites--installation)
+5. [Cloudflare API Token Configuration](#5-cloudflare-api-token-configuration)
+6. [Operational Manual & Workflows](#6-operational-manual--workflows)
+7. [Self-Healing State Reconciliation Trio](#7-self-healing-state-reconciliation-trio)
+8. [Origin CA vs Let's Encrypt Architecture](#8-origin-ca-vs-lets-encrypt-architecture)
+9. [Enterprise Free-Tier WAF Hardening](#9-enterprise-free-tier-waf-hardening)
+10. [Hosting Integration (ISPmanager / Nginx)](#10-hosting-integration-ispmanager--nginx)
+11. [Post-Provisioning Manual Hardening Checklist](#11-post-provisioning-manual-hardening-checklist)
+12. [Troubleshooting & FAQ](#12-troubleshooting--faq)
+13. [License](#13-license)
 ---
 
-## 🏛️ System Architecture
+## 1. System Architecture
 
 ```mermaid
 graph TD
@@ -62,7 +62,7 @@ graph TD
 
 ---
 
-## 💡 Core Engineering Highlights
+## 2. Core Engineering Highlights
 
 ### 1. Infrastructure-as-Data (IaD) & Blast Radius Isolation
 * **Separation of Concerns:** Eliminates raw HCL manipulation for day-to-day operations. Configuration parameters are stored in a human-readable Single Source of Truth (`config.yaml`).
@@ -87,7 +87,7 @@ The compiler manages three distinct representations for every domain:
 
 ---
 
-## 📂 Repository Topology
+## 3. Repository Topology
 
 ```text
 cloudflare-iac-portal/
@@ -126,7 +126,7 @@ cloudflare-iac-portal/
 
 ---
 
-## 🚀 Prerequisites & Installation
+## 4. Prerequisites & Installation
 
 ### 1. System Requirements
 * **Python 3.10, 3.11, 3.12, 3.13, or 3.14+**
@@ -160,7 +160,7 @@ cloudflare-iac-portal/terraform.exe
 
 ---
 
-## 🔑 Cloudflare API Token Configuration
+## 5. Cloudflare API Token Configuration
 
 To grant the orchestrator authority to manage zones, WAF rules, and certificates, create a dedicated scoped API token:
 
@@ -198,7 +198,7 @@ CLOUDFLARE_API_TOKEN="your_actual_token_here"
 
 ---
 
-## 🖥️ Operational Manual & Workflows
+## 6. Operational Manual & Workflows
 
 ### Launching the Portal
 ```bash
@@ -234,7 +234,7 @@ Access the application at `http://localhost:8501`. The control plane inspects th
 
 ---
 
-## 🔄 Self-Healing State Reconciliation Trio
+## 7. Self-Healing State Reconciliation Trio
 
 The `TerraformRunner` (`src/services/terraform_runner.py`) encapsulates automated recovery circuits for the three most common Cloudflare provider failures:
 
@@ -246,7 +246,7 @@ The `TerraformRunner` (`src/services/terraform_runner.py`) encapsulates automate
 
 ---
 
-## 🔒 Origin CA vs Let's Encrypt Architecture
+## 8. Origin CA vs Let's Encrypt Architecture
 
 Running conventional Let's Encrypt certificates on origin servers behind a Cloudflare proxy introduces fragility: ACME HTTP-01 challenges fail when WAF rules block bots, and renewals fail every 90 days.
 
@@ -264,7 +264,7 @@ Client Browser ────[ Strict HTTPS ]────► Cloudflare Edge ─�
 
 ---
 
-## 🛡️ Enterprise Free-Tier WAF Hardening
+## 9. Enterprise Free-Tier WAF Hardening
 
 Cloudflare Free-tier zones enforce strict engine limits: **maximum 5 Custom Rules + 1 Rate Limiting rule**, and **prohibit regex evaluation** (`matches` returns HTTP 400).
 
@@ -281,7 +281,7 @@ Our Jinja2 template (`_templates/firewall_rulesets.tf.j2`) optimizes protection 
 
 ---
 
-## 📦 Hosting Integration (ISPmanager / Nginx)
+## 10. Hosting Integration (ISPmanager / Nginx)
 
 ### Installing Origin CA Certificates in ISPmanager
 1. Open the domain card in the portal and expand **View generated SSL keys for hosting**.
@@ -299,7 +299,7 @@ Our Jinja2 template (`_templates/firewall_rulesets.tf.j2`) optimizes protection 
 
 ---
 
-## 🛡️ Post-Provisioning Manual Hardening Checklist
+## 11. Post-Provisioning Manual Hardening Checklist
 
 > [!IMPORTANT]
 > **Free-Tier API Restriction Note:**
@@ -356,7 +356,7 @@ Because all incoming traffic is proxied through Cloudflare Anycast edge nodes, w
 
 ---
 
-## ❓ Troubleshooting & FAQ
+## 12. Troubleshooting & FAQ
 
 #### Q: How do I handle corporate or regional network blocks to registry.terraform.io?
 **A:** The portal features built-in network diagnostics. If direct connectivity is blocked, open the **Network Routing** expander in Zone Settings and select an active regional mirror (e.g., *Selectel*, *TF.org.ru*, *Yandex Cloud*). The portal dynamically writes a local `terraform.rc` configuration injecting the mirror without mutating system-level settings.
@@ -369,6 +369,6 @@ Because all incoming traffic is proxied through Cloudflare Anycast edge nodes, w
 
 ---
 
-## 📄 License
+## 13. License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
