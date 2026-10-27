@@ -60,10 +60,9 @@ zone_settings:
   processing_site: "### ⚙️ Обработка сайта: `{domain}`"
   generated_success: "Файлы сгенерированы в папке `sites/{folder}`"
   deploy_success: "✅ Инфраструктура для {domain} успешно обновлена!"
-  deploy_cert_info: "🔒 15-летний сертификат успешно сохранен: `sites/{folder}/ssl/cert.pem`"
+  deploy_cert_info: "🔒 Активный сертификат находится здесь: `sites/{folder}/ssl/cert.pem`"
   deploy_error: "❌ Ошибка применения настроек для {domain}."
   process_completed: "🏁 Процесс завершен."
-  zone_settings:
   always_https_label: "Принудительный HTTPS (Always Use HTTPS)"
   browser_check_label: "Проверка браузера (Browser Integrity Check)"
   email_obfus_label: "Защита email от спам-ботов (Email Obfuscation)"
@@ -73,6 +72,9 @@ zone_settings:
   sync_all_wiped: "⚠️ АБСОЛЮТНО ВСЕ индивидуальные настройки (включая Гео-фильтры) стерты!"
   sync_geo_reset: "⚠️ Индивидуальные гео-фильтры всех сайтов сброшены! Теперь у всех единый глобальный фильтр."
   sync_defaults_updated: "🛡️ Глобальные настройки обновлены. Индивидуальные настройки сайтов сохранены."
+  server_ip_field: "🌐 IP-адрес сервера (Origin Server IP):"
+  server_ip_help: "При смене IP Terraform автоматически обновит А-записи (@ и www) в Cloudflare без простоя сайта."
+  err_empty_ip: "IP-адрес не может быть пустым!"
 
 ssl_block:
   title: "🔒 Управление SSL-сертификатами (Cloudflare Origin CA)"

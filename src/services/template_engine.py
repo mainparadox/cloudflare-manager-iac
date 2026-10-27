@@ -111,9 +111,10 @@ class TemplateEngine:
 
         ARCHITECTURE:
             1. Deep merge: Global baseline parameters are extended and overridden by site-specific overrides.
-            2. Atomic drift cleanup: Prior to rendering, old `.tf` files in the target directory
-               are purged (`unlink()`). This prevents orphaned resources (e.g., leftover redirect rules
-               when switching an existing domain to a main site) from corrupting the Terraform plan.
+            2. Atomic drift cleanup (All-or-Nothing): Templates are validated and rendered in-memory
+               first. Only after 100% successful generation, old `.tf` files in the target directory
+               are purged (`unlink()`). This guarantees that syntax or Jinja errors will never leave
+               the workspace in a half-deleted or corrupt state.
             3. Dynamic SSL generation: Evaluates certificate renewal policies, handling 15-year
                Cloudflare Origin CA automation vs user-supplied external certificates.
 
@@ -192,18 +193,24 @@ class TemplateEngine:
                 ("redirect_rules.tf.j2", "redirect_rules.tf"),
             ]
 
-        # ARCHITECTURE (Idempotent Drift Prevention):
-        # Purge all existing .tf manifests before re-rendering. Ensures obsolete resources
-        # (e.g. from template renamings or site type changes) do not linger in the workspace.
+        # ARCHITECTURE (Phase 1: In-Memory Validation Gate):
+        # Render all templates in-memory before modifying the filesystem.
+        # If any Jinja2 template is broken, an exception is raised here without touching existing files.
+        rendered_payloads = {}
+        for template_name, output_name in templates:
+            rendered_payloads[output_name] = self.env.get_template(template_name).render(**context)
+
+        # ARCHITECTURE (Phase 2: Atomic Cleanup & Safe Disk Flush):
+        # Purge obsolete .tf manifests only after in-memory rendering succeeds.
+        # Ensures obsolete resources do not linger in the workspace.
         for item in site_dir.iterdir():
             if item.is_file() and item.name.endswith(".tf"):
                 item.unlink()
 
         # Render and persist fresh HCL configurations
-        for template_name, output_name in templates:
+        for output_name, content in rendered_payloads.items():
             output_path = site_dir / output_name
-            rendered = self.env.get_template(template_name).render(**context)
             with open(output_path, "w", encoding="utf-8") as f:
-                f.write(rendered)
+                f.write(content)
 
         return site_dir

@@ -9,6 +9,7 @@ ARCHITECTURE:
     introducing the overhead of full Terraform plan/apply lifecycles.
 """
 
+import os
 from typing import Any, Dict, List, Optional, Tuple
 import requests
 
@@ -24,41 +25,49 @@ class CloudflareClient:
     # ARCHITECTURE: Root endpoint pinned to v4 to ensure stable payload contracts.
     BASE_URL = "https://api.cloudflare.com/client/v4"
 
-    def __init__(self, api_token: str):
+    def __init__(self, api_token: str, account_id: Optional[str] = None):
         """
         Initializes the Cloudflare API client with Bearer authentication.
 
         :param api_token: Scoped Cloudflare API Token (not legacy Global API Key).
+        :param account_id: Optional explicit Account ID. If omitted, checks CLOUDFLARE_ACCOUNT_ID
+                           environment variable before falling back to API discovery.
         :raises ValueError: If the token is empty or contains solely whitespace.
         """
         if not api_token:
             raise ValueError("Cloudflare API token must not be empty.")
         
         # HACK: Strip accidental newlines/spaces frequently introduced via
-        # copy-pasting API tokens into UI inputs or environment variables,
-        # preventing subtle HTTP 400/403 authorization rejections.
+        # copy-pasting API tokens into UI inputs or environment variables.
         self.api_token = api_token.strip()
         self.headers = {
             "Authorization": f"Bearer {self.api_token}",
             "Content-Type": "application/json",
         }
 
+        # ARCHITECTURE: Deterministic account targeting.
+        # Explicit parameter > Environment variable > None (fallback to auto-discovery).
+        env_acc_id = os.getenv("CLOUDFLARE_ACCOUNT_ID", "").strip()
+        self.account_id = account_id.strip() if account_id else (env_acc_id or None)
+
     def get_account_id(self) -> Optional[str]:
         """
-        Dynamically discovers the primary Cloudflare Account ID associated with the token.
+        Resolves the Cloudflare Account ID.
 
         ARCHITECTURE:
-            Avoids hardcoding account IDs across multi-tenant environments. By resolving
-            the primary account context at runtime, configurations remain portable
-            across different Cloudflare organizations. Requires 'Account -> Account Settings -> Read'
-            permission on the provisioned token.
+            1. If `account_id` was explicitly provided or set in `.env`, returns it immediately
+               without consuming network I/O.
+            2. If not specified, performs dynamic discovery via `/accounts` as a fallback.
+               Avoids silent wrong-account mutations in multi-tenant/multi-org setups.
 
         :return: Account identifier string if found, otherwise None.
         """
+        # Fast-path: return explicitly configured account ID
+        if self.account_id:
+            return self.account_id
+
         url = f"{self.BASE_URL}/accounts"
         try:
-            # NOTE: Keep network timeout conservative (10s) to prevent pipeline stalls
-            # in interactive Streamlit sessions or automated CI/CD runners.
             response = requests.get(url, headers=self.headers, timeout=10)
             if response.status_code == 200:
                 data = response.json()
@@ -66,9 +75,9 @@ class CloudflareClient:
                     accounts = data.get("result", [])
                     if accounts:
                         # Fallback to the first available organization context bound to the token
-                        return accounts[0]["id"]
+                        self.account_id = accounts[0]["id"]
+                        return self.account_id
         except Exception:
-            # Fail silently to allow callers to handle downstream fallbacks or state degradation
             pass
         return None
 

@@ -123,9 +123,10 @@ config_mgr = ConfigManager(CONFIG_FILE)
 template_engine = TemplateEngine(TEMPLATES_DIR, SITES_DIR, SHARED_TF_DIR)
 tf_runner = TerraformRunner(TF_EXE, BASE_DIR, SHARED_TF_DIR, PLUGIN_CACHE_DIR, i18n)
 
-# API client initialization; degrades gracefully if running offline without credentials
+# API client initialization; supports explicit account targeting via .env
 api_token = os.getenv("CLOUDFLARE_API_TOKEN", "")
-cf_client = CloudflareClient(api_token) if api_token else None
+account_id = os.getenv("CLOUDFLARE_ACCOUNT_ID", "")
+cf_client = CloudflareClient(api_token, account_id=account_id) if api_token else None
 
 
 def get_safe_index(options_list, value, default_val):
@@ -315,21 +316,47 @@ elif active_tab == "zone_settings":
     if site_type == "main":
         # Form encapsulation batches inputs, preventing expensive intermediate reruns
         with st.form("zone_settings_form"):
+            current_ip = site_data.get("ip", "")
+            new_ip = current_ip
+            if not is_global:
+                new_ip = st.text_input(
+                    i18n.t("zone_settings.server_ip_field"),
+                    value=current_ip,
+                    help=i18n.t("zone_settings.server_ip_help"),
+                ).strip()
+                st.markdown("---")
             col1, col2 = st.columns(2)
 
             with col1:
-                always_https = st.toggle("Always Use HTTPS", value=current_settings.get("always_https", True))
-                browser_check = st.toggle("Browser Integrity Check", value=current_settings.get("browser_check", True))
-                email_obfus = st.toggle("Email Obfuscation", value=current_settings.get("email_obfuscation", True))
+                always_https = st.toggle(
+                    i18n.t("zone_settings.always_https_label"), 
+                    value=current_settings.get("always_https", True)
+                )
+                browser_check = st.toggle(
+                    i18n.t("zone_settings.browser_check_label"), 
+                    value=current_settings.get("browser_check", True)
+                )
+                email_obfus = st.toggle(
+                    i18n.t("zone_settings.email_obfus_label"), 
+                    value=current_settings.get("email_obfuscation", True)
+                )
 
             with col2:
                 sec_options = ["off", "essentially_off", "low", "medium", "high", "under_attack"]
                 sec_val = current_settings.get("security_level", "medium")
-                security_level = st.selectbox("Security Level", options=sec_options, index=get_safe_index(sec_options, sec_val, "medium"))
+                security_level = st.selectbox(
+                    i18n.t("zone_settings.security_level_label"), 
+                    options=sec_options, 
+                    index=get_safe_index(sec_options, sec_val, "medium")
+                )
 
                 tls_options = ["1.0", "1.1", "1.2", "1.3"]
                 tls_val = current_settings.get("min_tls_version", "1.2")
-                min_tls = st.selectbox("Minimum TLS Version", options=tls_options, index=get_safe_index(tls_options, tls_val, "1.2"))
+                min_tls = st.selectbox(
+                    i18n.t("zone_settings.min_tls_label"), 
+                    options=tls_options, 
+                    index=get_safe_index(tls_options, tls_val, "1.2")
+                )
 
                 geo_keys = ["by_ru_eu", "by_ru", "by_only"]
                 current_geo = current_settings.get("geo_filter", "by_ru_eu")
@@ -385,6 +412,9 @@ elif active_tab == "zone_settings":
                 st.info(i18n.t("ssl_block.not_issued_info"))
 
         if submitted:
+            if not is_global and not new_ip:
+                st.error(i18n.t("zone_settings.err_empty_ip"))
+                st.stop()
             new_settings = {
                 "always_https": always_https,
                 "browser_check": browser_check,
@@ -417,6 +447,7 @@ elif active_tab == "zone_settings":
                         if "custom_settings" in s_data and "geo_filter" in s_data["custom_settings"]:
                             del s_data["custom_settings"]["geo_filter"]
             else:
+                st.session_state.config["sites"][target]["ip"] = new_ip
                 # Compute and store minimal delta overrides against global defaults
                 custom = {k: v for k, v in new_settings.items() if v != global_defaults.get(k)}
                 st.session_state.config["sites"][target]["custom_settings"] = custom

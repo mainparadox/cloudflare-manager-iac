@@ -60,7 +60,7 @@ zone_settings:
   processing_site: "### ⚙️ Processing Site: `{domain}`"
   generated_success: "HCL configuration rendered in `sites/{folder}`"
   deploy_success: "✅ Infrastructure for {domain} successfully updated!"
-  deploy_cert_info: "🔒 15-year certificate saved: `sites/{folder}/ssl/cert.pem`"
+  deploy_cert_info: "🔒 Active 15-year certificate is located at: `sites/{folder}/ssl/cert.pem`"
   deploy_error: "❌ Deployment error for {domain}."
   process_completed: "🏁 Operation completed."
   always_https_label: "Always Use HTTPS"
@@ -76,6 +76,9 @@ zone_settings:
   sync_all_wiped: "⚠️ ABSOLUTELY ALL site overrides (including Geo-filters) wiped cleanly!"
   sync_geo_reset: "⚠️ Individual Geo-filters reset across all sites! Fleet unified under global filter."
   sync_defaults_updated: "🛡️ Global defaults updated. Individual site overrides preserved."
+  server_ip_field: "🌐 Origin Server IP:"
+  server_ip_help: "When changing IP, Terraform will update A-records (@ and www) on Cloudflare edge in-place with zero downtime."
+  err_empty_ip: "Server IP cannot be empty!"
 
 ssl_block:
   title: "🔒 SSL Certificate Management (Cloudflare Origin CA)"
@@ -208,7 +211,8 @@ tools:
   err_confirm_mismatch: "Confirmation input does not match target domain!"
   destroy_failed: "❌ Terraform destroy failed for {domain}. Review logs above."
   zone_delete_failed: "⚠️ Failed to delete zone from Cloudflare: {err}"
-  delete_success: "✅ Tenant {domain} successfully decommissioned and purged!"cascade_checkbox: "🔗 Cascade Teardown: also permanently destroy all bound mirrors ({mirrors})"
+  delete_success: "✅ Tenant {domain} successfully decommissioned and purged!"
+  cascade_checkbox: "🔗 Cascade Teardown: also permanently destroy all bound mirrors ({mirrors})"
   cascade_destroying: "### ⚙️ Tearing down bound mirror: `{domain}`"
 
 runner:
